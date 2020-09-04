@@ -12,13 +12,13 @@ class Railway {
     let distance = 0, routeDistance, currentStop = stops[0]
 
     try {
-      stops.slice(1).forEach(stop => {
-        routeDistance = this.routeTable[currentStop].destinations[stop]
+      stops.slice(1).forEach(nextStop => {
+        routeDistance = this.routeTable[currentStop].destinations[nextStop]
         if(!routeDistance) {
           throw "NO SUCH ROUTE"
         }
         distance += routeDistance
-        currentStop = stop
+        currentStop = nextStop
       })
     } catch(exception) {
       return exception
@@ -27,27 +27,27 @@ class Railway {
     return distance
   }
 
-  findRoutesByMaxStops(origin, destination, stops) {
+  findRoutesByMaxStops(origin, destination, numStops) {
     let validRoutes = 0
 
     Object.keys(this.routeTable[origin].destinations).forEach(node => {
       if(destination === node) {
         validRoutes += 1
       }
-      if(stops > 1) {
-        validRoutes += this.findRoutesByMaxStops(node, destination, stops-1)
+      if(numStops > 1) {
+        validRoutes += this.findRoutesByMaxStops(node, destination, numStops-1)
       }
     })
 
     return validRoutes
   }
 
-  findRoutesByExactStops(origin, destination, stops) {
+  findRoutesByExactStops(origin, destination, numStops) {
     let validRoutes = 0
 
     Object.keys(this.routeTable[origin].destinations).forEach(node => {
-      if(stops > 1) {
-        validRoutes += this.findRoutesByExactStops(node, destination, stops-1)
+      if(numStops > 1) {
+        validRoutes += this.findRoutesByExactStops(node, destination, numStops-1)
       } else if(node === destination) {
         validRoutes += 1
       }
@@ -63,7 +63,7 @@ class Railway {
     untraversed.forEach(node => {
       if(this.routeTable[node]) {
         const current = this.findShortestDistance(node, destination, traversed.concat(origin)) + this.routeTable[origin].destinations[node]
-        if(!distance || current < distance) {
+        if(!distance || distance > current) {
           distance = current
         }
       }
@@ -72,17 +72,17 @@ class Railway {
     return distance
   }
 
-  findRoutesByDistance(origin, destination, distance) {
+  findRoutesByDistance(origin, destination, maxDistance) {
     let validRoutes = 0
 
     Object.keys(this.routeTable[origin].destinations).forEach(node => {
       const routeDistance = this.routeTable[origin].destinations[node]
-      if(distance > routeDistance) {
+      if(maxDistance > routeDistance) {
         if(destination === node) {
           validRoutes += 1
         }
 
-        validRoutes += this.findRoutesByDistance(node, destination, distance - routeDistance)
+        validRoutes += this.findRoutesByDistance(node, destination, maxDistance - routeDistance)
       }
     })
 
@@ -97,7 +97,8 @@ class Railway {
       if(this.routeTable[origin]) {
         this.routeTable[origin].addDestination(destination, distance)
       } else {
-        this.routeTable[origin] = new Stop(origin, destination, distance)
+        this.routeTable[origin] = new Stop(origin)
+        this.routeTable[origin].addDestination(destination, distance)
       }
     })
   }

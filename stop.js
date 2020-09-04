@@ -1,8 +1,7 @@
 class Stop {
-  constructor(origin, destination, distance) {
+  constructor(origin) {
     this.origin = origin
     this.destinations = {}
-    this.destinations[destination] = parseInt(distance)
   }
 
   addDestination(destination, distance) {
